@@ -1,0 +1,50 @@
+<main class="acceso">
+  <section class="tarjeta-acceso">
+    <p class="marca"><a routerLink="/usados">Firmeza</a></p>
+    <h1>{{ modo === 'entrar' ? 'Ingresar' : 'Crear account' }}</h1>
+    <p class="nota">
+      {{ modo === 'entrar' ? 'Entra para ver el catálogo y comprar en línea.' : 'La account queda ligada a tu document y tu email.' }}
+    </p>
+
+    @if (modo === 'entrar') {
+      <form class="formulario" (ngSubmit)="signIn()" novalidate>
+        <label for="email">Correo
+          <input id="email" name="email" [(ngModel)]="email" autocomplete="username" />
+        </label>
+        <label for="clave">Clave
+          <input id="clave" name="clave" type="password" [(ngModel)]="password" autocomplete="current-password" />
+        </label>
+        <button class="boton" type="submit" [disabled]="sending()">Ingresar</button>
+      </form>
+      <button class="enlace" type="button" (click)="mostrarAbrir()">Crear account</button>
+    } @else {
+      <form class="formulario" (ngSubmit)="open()" novalidate>
+        <label for="name">Nombre
+          <input id="name" name="name" [(ngModel)]="name" autocomplete="name" />
+        </label>
+        <label for="email-nueva">Correo
+          <input id="email-nueva" name="email" [(ngModel)]="email" autocomplete="username" />
+        </label>
+        <label for="documento">Documento
+          <input id="documento" name="documento" [(ngModel)]="document" inputmode="numeric" />
+        </label>
+        <label for="telefono">Teléfono
+          <input id="telefono" name="telefono" [(ngModel)]="phone" inputmode="numeric" />
+        </label>
+        <label for="clave-nueva">Clave
+          <input id="clave-nueva" name="clave" type="password" [(ngModel)]="password" autocomplete="new-password" />
+        </label>
+        <button class="boton" type="submit" [disabled]="sending()">Crear account</button>
+      </form>
+      <p class="nota">8 caracteres, con mayúscula, minúscula, número y un signo.</p>
+      <button class="enlace" type="button" (click)="mostrarEntrar()">Ya tengo account</button>
+    }
+
+    @if (notice()) {
+      <p class="aviso" role="status">{{ notice() }}</p>
+    }
+    @if (error()) {
+      <p class="aviso-error" role="alert">{{ error() }}</p>
+    }
+  </section>
+</main>

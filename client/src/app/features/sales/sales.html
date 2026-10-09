@@ -1,0 +1,157 @@
+<h1>Ventas</h1>
+<p class="nota">
+  @if (canSell()) {
+    Registras sales de {{ miCounter() ?? 'tu counter' }}: customer, canal, forma de pago y el car o los repuestos. El
+    price y el IVA los calcula el sistema; el usado queda en peritaje 7 días.
+  } @else {
+    Ventas de todos los counters. Las compras en peritaje se cierran cuando el usado pasa la revisión o se anulan si no.
+  }
+</p>
+
+@if (status() === 'cargando') {
+  <p class="estado" role="status">Cargando las sales...</p>
+}
+@if (status() === 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}
+@if (status() === 'listo' && sales().length === 0) {
+  <p class="vacio">Todavía no hay sales.</p>
+}
+@if (status() === 'listo' && sales().length > 0) {
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Número</th>
+        <th scope="col">Counter</th>
+        <th scope="col">Cliente</th>
+        <th scope="col">Qué</th>
+        <th scope="col">Canal y pago</th>
+        <th scope="col">Estado</th>
+        <th scope="col">Total</th>
+        <th scope="col"><span class="oculto">Acciones</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (sale of sales(); track sale.id) {
+        <tr>
+          <td>
+            {{ sale.number }}
+            <div class="nota">{{ date(sale.date) }}</div>
+          </td>
+          <td>{{ sale.branch }}</td>
+          <td>{{ sale.customerName }}</td>
+          <td>
+            @if (sale.carName) {
+              {{ sale.carName }}
+            }
+            @for (line of sale.lines; track line.productId) {
+              <div>{{ line.productName }} × {{ line.quantity }}</div>
+            }
+          </td>
+          <td>
+            {{ canalYPago(sale) }}
+            <div class="nota">{{ compraDelCliente(sale) ? 'Compra del customer' : sale.sellerEmail }}</div>
+          </td>
+          <td>
+            {{ saleStatus(sale) }}
+            @if (sale.inspectionDeposit !== null && sale.status === 'preliminar') {
+              <div class="nota">Cargo preliminar {{ moneda(sale.inspectionDeposit) }}</div>
+            }
+          </td>
+          <td>{{ moneda(sale.total) }}</td>
+          <td class="acciones">
+            @if (sale.status === 'preliminar' && handlesInspection()) {
+              <app-terminal-button type="button" (pressed)="closeInspection(sale)">Cerrar peritaje</app-terminal-button>
+              <app-terminal-button type="button" (pressed)="cancel(sale)">Anular</app-terminal-button>
+            }
+            @if (canSell() && !compraDelCliente(sale)) {
+              <app-terminal-button type="button" (pressed)="remove(sale)">Eliminar</app-terminal-button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+@if (canSell() && status() === 'listo' && customers().length === 0) {
+  <p class="vacio">Primero crea el customer. Después vuelves aquí y registras la sale.</p>
+}
+
+@if (canSell() && status() === 'listo' && customers().length > 0) {
+  <h2>Nueva sale</h2>
+  <form class="formulario" (ngSubmit)="register()" novalidate>
+    <label for="customer">Cliente
+      <select id="customer" name="customer" [(ngModel)]="customerId">
+        <option value="">Selecciona</option>
+        @for (customer of customers(); track customer.id) {
+          <option [value]="customer.id">{{ customer.name }}</option>
+        }
+      </select>
+    </label>
+    <label for="canal">Canal
+      <select id="canal" name="canal" [ngModel]="channel" (ngModelChange)="cambiarCanal($event)">
+        <option value="punto">Counter</option>
+        <option value="pagina">Página</option>
+      </select>
+    </label>
+    <label for="metodo">Forma de pago
+      <select id="metodo" name="metodo" [(ngModel)]="paymentMethod">
+        @for (metodo of metodos(); track metodo.valor) {
+          <option [value]="metodo.valor">{{ metodo.text }}</option>
+        }
+      </select>
+    </label>
+    <label for="modo">Qué vende
+      <select id="modo" name="modo" [(ngModel)]="modo">
+        <option value="car">Carro</option>
+        <option value="repuesto">Repuesto</option>
+      </select>
+    </label>
+    @if (modo === 'car') {
+      @if (available().length === 0) {
+        <p class="vacio">No hay cars disponibles en tu counter.</p>
+      } @else {
+        <label for="car">Carro
+          <select id="car" name="car" [(ngModel)]="carId">
+            <option value="">Selecciona</option>
+            @for (car of available(); track car.id) {
+              <option [value]="car.id">{{ car.brand }} {{ car.line }} {{ car.year }}</option>
+            }
+          </select>
+        </label>
+      }
+    } @else {
+      @if (products().length === 0) {
+        <p class="vacio">No hay repuestos. Cárgalos en Repuestos.</p>
+      }
+      @for (line of lines; track $index) {
+        <div class="line">
+          <label [attr.for]="'product-' + $index">Repuesto
+            <select [id]="'product-' + $index" [name]="'product-' + $index" [(ngModel)]="line.productId">
+              <option value="">Selecciona</option>
+              @for (product of products(); track product.id) {
+                <option [value]="product.id">{{ product.sku }} {{ product.name }} ({{ product.quantity }})</option>
+              }
+            </select>
+          </label>
+          <label [attr.for]="'quantity-' + $index">Cantidad
+            <input [id]="'quantity-' + $index" [name]="'quantity-' + $index" [(ngModel)]="line.quantity" inputmode="numeric" />
+          </label>
+          @if (lines.length > 1) {
+            <app-terminal-button type="button" (pressed)="quitar($index)">Quitar</app-terminal-button>
+          }
+        </div>
+      }
+      <app-terminal-button type="button" (pressed)="agregarLinea()">Otro repuesto</app-terminal-button>
+    }
+    <app-terminal-button type="submit" [disabled]="sending()">Registrar sale</app-terminal-button>
+  </form>
+}
+
+@if (notice()) {
+  <p class="aviso" role="status">{{ notice() }}</p>
+}
+@if (error() && status() !== 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}

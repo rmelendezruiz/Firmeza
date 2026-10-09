@@ -1,0 +1,110 @@
+<h1><span class="prompt">$</span> products</h1>
+<p class="nota">Repuesto: SKU, brand, categoría y los vehículos donde aplica. Sin vehículos queda universal.</p>
+
+<form class="filtros" (ngSubmit)="load()" novalidate>
+  <label for="search">búsqueda</label>
+  <input id="search" name="search" [(ngModel)]="search" />
+  <label for="filter">filter</label>
+  <select id="filter" name="filter" [(ngModel)]="filter">
+    <option value="">todos</option>
+    <option value="con">con existencias</option>
+    <option value="sin">sin existencias</option>
+  </select>
+  <app-terminal-button type="submit">buscar</app-terminal-button>
+  <app-terminal-button type="button" (pressed)="clearSearch()">limpiar</app-terminal-button>
+</form>
+
+@if (status() === 'cargando') {
+  <p class="estado" role="status">cargando...</p>
+}
+@if (status() === 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}
+@if (status() === 'listo' && products().length === 0) {
+  <p class="vacio">no hay products.</p>
+}
+@if (status() === 'listo' && products().length > 0) {
+  <table>
+    <thead>
+      <tr>
+        <th>sku</th>
+        <th>name</th>
+        <th>brand</th>
+        <th>categoría</th>
+        <th>price</th>
+        <th>quantity</th>
+        <th>aplicación</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of products(); track product.id) {
+        <tr>
+          <td>{{ product.sku }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.brandName }}</td>
+          <td>{{ product.categoryName }}</td>
+          <td>{{ moneda(product.price) }}</td>
+          <td>{{ product.quantity }}</td>
+          <td>
+            @if (product.vehicleIds.length === 0) {
+              <span>sin aplicación</span>
+            }
+            @for (id of product.vehicleIds; track id) {
+              <div>{{ nombreVehiculo(id) }}</div>
+            }
+          </td>
+          <td class="acciones">
+            <app-terminal-button type="button" (pressed)="edit(product)">editar</app-terminal-button>
+            <app-terminal-button type="button" (pressed)="remove(product)">eliminar</app-terminal-button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+<form class="formulario" (ngSubmit)="save()" novalidate>
+  <p class="nota">{{ editingId() ? 'editando product' : 'nuevo product' }}</p>
+  <label for="sku">sku</label>
+  <input id="sku" name="sku" [(ngModel)]="sku" />
+  <label for="name">name</label>
+  <input id="name" name="name" [(ngModel)]="name" />
+  <label for="brand">brand</label>
+  <select id="brand" name="brand" [(ngModel)]="brandId">
+    <option value="">selecciona</option>
+    @for (brand of brands(); track brand.id) {
+      <option [value]="brand.id">{{ brand.name }}</option>
+    }
+  </select>
+  <label for="category">categoría</label>
+  <select id="category" name="category" [(ngModel)]="categoryId">
+    <option value="">selecciona</option>
+    @for (category of categories(); track category.id) {
+      <option [value]="category.id">{{ category.name }}</option>
+    }
+  </select>
+  <label for="vehicles">vehículos</label>
+  <select id="vehicles" name="vehicles" multiple [(ngModel)]="vehicleIds">
+    @for (vehicle of vehicles(); track vehicle.id) {
+      <option [value]="vehicle.id">{{ vehicle.brand }} {{ vehicle.line }} {{ vehicle.year }}</option>
+    }
+  </select>
+  <label for="price">price</label>
+  <input id="price" name="price" [(ngModel)]="price" inputmode="decimal" />
+  <label for="quantity">quantity</label>
+  <input id="quantity" name="quantity" [(ngModel)]="quantity" inputmode="numeric" />
+  <div class="acciones">
+    <app-terminal-button type="submit" [disabled]="sending()">guardar</app-terminal-button>
+    @if (editingId()) {
+      <app-terminal-button type="button" (pressed)="cancel()">cancelar</app-terminal-button>
+    }
+  </div>
+</form>
+
+@if (notice()) {
+  <p class="aviso" role="status">{{ notice() }}</p>
+}
+@if (error() && status() !== 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}

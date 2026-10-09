@@ -1,0 +1,83 @@
+<h1>Equipo</h1>
+<p class="nota">
+  El admin abre las cuentas del equipo y les asigna counter. El gerente de Firmeza ve todos los counters; cada gerente y
+  cada comercial trabaja en uno. Los customers abren su propia account en la página.
+</p>
+
+@if (status() === 'cargando') {
+  <p class="estado" role="status">Cargando el equipo...</p>
+}
+@if (status() === 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}
+@if (status() === 'listo') {
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Correo</th>
+        <th scope="col">Role</th>
+        <th scope="col">Counter</th>
+        <th scope="col">Cambiar de counter</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (account of accounts(); track account.id) {
+        <tr>
+          <td>{{ account.email }}</td>
+          <td>{{ roleName(account.role) }}</td>
+          <td>{{ account.branch ?? (hasBranch(account.role) ? 'Sin counter' : 'Todos') }}</td>
+          <td>
+            @if (hasBranch(account.role)) {
+              <div class="acciones">
+                <label class="oculto" [attr.for]="'traslado-' + account.id">Counter de {{ account.email }}</label>
+                <select [id]="'traslado-' + account.id" [name]="'traslado-' + account.id" [(ngModel)]="traslado[account.id]">
+                  <option value="">Selecciona</option>
+                  @for (branch of branches(); track branch.id) {
+                    <option [value]="branch.id">{{ branch.code }} · {{ branch.name }}</option>
+                  }
+                </select>
+                <app-terminal-button type="button" (pressed)="trasladar(account)">Asignar</app-terminal-button>
+              </div>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <h2>Nueva account</h2>
+  <form class="formulario" (ngSubmit)="save()" novalidate>
+    <label for="email">Correo
+      <input id="email" name="email" [(ngModel)]="email" autocomplete="off" />
+    </label>
+    <label for="clave">Clave
+      <input id="clave" name="clave" type="password" [(ngModel)]="password" autocomplete="new-password" />
+    </label>
+    <label for="rol">Role
+      <select id="rol" name="rol" [(ngModel)]="role">
+        @for (opcion of roles; track opcion) {
+          <option [value]="opcion">{{ roleName(opcion) }}</option>
+        }
+      </select>
+    </label>
+    @if (hasBranch(role)) {
+      <label for="branch">Counter
+        <select id="branch" name="branch" [(ngModel)]="branchId">
+          <option value="">Selecciona</option>
+          @for (branch of branches(); track branch.id) {
+            <option [value]="branch.id">{{ branch.code }} · {{ branch.name }}</option>
+          }
+        </select>
+      </label>
+    }
+    <app-terminal-button type="submit" [disabled]="sending()">Crear account</app-terminal-button>
+  </form>
+  <p class="nota">La clave lleva 8 caracteres, mayúscula, minúscula, número y un signo. Cada counter tiene un solo gerente.</p>
+}
+
+@if (notice()) {
+  <p class="aviso" role="status">{{ notice() }}</p>
+}
+@if (error() && status() !== 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}

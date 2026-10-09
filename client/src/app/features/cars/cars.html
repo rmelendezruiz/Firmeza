@@ -1,0 +1,114 @@
+<h1>Carros</h1>
+<p class="nota">
+  Cada car vive en un counter. Se publica en la página, en el counter o en ambos; el usado lleva mileage. Solo el
+  gerente de Firmeza y el gerente del counter publican.
+</p>
+
+@if (status() === 'cargando') {
+  <p class="estado" role="status">Cargando los cars...</p>
+}
+@if (status() === 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}
+@if (status() === 'listo' && cars().length === 0) {
+  <p class="vacio">No hay cars en tu counter.</p>
+}
+@if (status() === 'listo' && cars().length > 0) {
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Carro</th>
+        <th scope="col">Counter</th>
+        <th scope="col">Dónde se vende</th>
+        <th scope="col">Prices</th>
+        <th scope="col"><span class="oculto">Acciones</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (car of cars(); track car.id) {
+        <tr>
+          <td>{{ car.brand }} {{ car.line }} {{ car.year }}</td>
+          <td>{{ car.branch }}</td>
+          <td>{{ estadoCarro(car) }}</td>
+          <td>{{ precios(car) }}</td>
+          <td class="acciones">
+            @if (puedePublicar() && !car.sold) {
+              <app-terminal-button type="button" (pressed)="edit(car)">Editar</app-terminal-button>
+              <app-terminal-button type="button" (pressed)="remove(car)">Eliminar</app-terminal-button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+@if (puedePublicar() && status() === 'listo') {
+  <h2>{{ editingId() ? 'Editar car' : 'Publicar car' }}</h2>
+  <form class="formulario" (ngSubmit)="save()" novalidate>
+    <label for="brand">Marca <input id="brand" name="brand" [(ngModel)]="brand" /></label>
+    <label for="line">Línea <input id="line" name="line" [(ngModel)]="line" /></label>
+    <label for="year">Año <input id="year" name="year" [(ngModel)]="year" inputmode="numeric" /></label>
+    <label for="type">Type
+      <select id="type" name="type" [(ngModel)]="type">
+        <option value="automovil">Automóvil</option>
+        <option value="camion">Camión</option>
+        <option value="moto">Moto</option>
+      </select>
+    </label>
+    <label for="condition">Condición
+      <select id="condition" name="condition" [(ngModel)]="condition">
+        <option value="usado">Usado</option>
+        <option value="nuevo">Nuevo</option>
+      </select>
+    </label>
+    @if (condition === 'usado') {
+      <label for="mileage">Kilometraje
+        <input id="mileage" name="mileage" [(ngModel)]="mileage" inputmode="numeric" />
+      </label>
+    }
+    <label for="availability">Disponibilidad
+      <select id="availability" name="availability" [(ngModel)]="availability">
+        <option value="ambos">Página y counter</option>
+        <option value="pagina">Solo página, en bodega</option>
+        <option value="counter">Solo counter</option>
+      </select>
+    </label>
+    @if (availability !== 'counter') {
+      <label for="precioPagina">Precio página
+        <input id="precioPagina" name="precioPagina" [(ngModel)]="pagePrice" inputmode="decimal" />
+      </label>
+    }
+    @if (availability !== 'pagina') {
+      <label for="precioCounter">Precio counter
+        <input id="precioCounter" name="precioCounter" [(ngModel)]="counterPrice" inputmode="decimal" />
+      </label>
+    }
+    @if (eligeCounter()) {
+      <label for="branch">Counter
+        <select id="branch" name="branch" [(ngModel)]="branchId">
+          <option value="">Selecciona</option>
+          @for (branch of branches(); track branch.id) {
+            <option [value]="branch.id">{{ branch.code }} · {{ branch.name }}</option>
+          }
+        </select>
+      </label>
+    } @else {
+      <p class="nota">Se publica en {{ miCounter() ?? 'tu counter' }}.</p>
+    }
+    <label for="photoUrl">Foto <input id="photoUrl" name="photoUrl" [(ngModel)]="photoUrl" /></label>
+    <div class="acciones">
+      <app-terminal-button type="submit" [disabled]="sending()">Guardar</app-terminal-button>
+      @if (editingId()) {
+        <app-terminal-button type="button" (pressed)="cancel()">Cancelar</app-terminal-button>
+      }
+    </div>
+  </form>
+}
+
+@if (notice()) {
+  <p class="aviso" role="status">{{ notice() }}</p>
+}
+@if (error() && status() !== 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}

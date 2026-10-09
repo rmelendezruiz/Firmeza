@@ -1,0 +1,52 @@
+@if (car(); as unidad) {
+  <div class="velo" role="presentation" (click)="signOut()">
+    <section class="dialogo" role="dialog" aria-modal="true" aria-labelledby="titulo-compra" (click)="$event.stopPropagation()">
+      <p class="gesto">Compra en línea</p>
+      <h2 id="titulo-compra">{{ unidad.brand }} {{ unidad.line }} {{ unidad.year }}</h2>
+      <p>Counter {{ unidad.branch }} · {{ unidad.city }}</p>
+      <p>Precio de página que estás confirmando: {{ moneda(unidad.pagePrice ?? 0) }}</p>
+      @if (unidad.condition === 'usado') {
+        <p>
+          El cargo preliminar es el 10% de ese precio. Es temporal: tienes 7 días para llevar el usado a
+          {{ unidad.branch }}. No es el pago final y no se cobra una tarjeta desde aquí. Si el precio cambió, la
+          reserva se rechaza y lo vuelves a ver.
+        </p>
+      } @else {
+        <p>La compra queda registrada por el precio de página, con IVA. No hay cargo a una tarjeta desde aquí.</p>
+      }
+      <fieldset>
+        <legend>Cómo pagas</legend>
+        <label>
+          <input type="radio" name="metodo" value="transferencia" [(ngModel)]="metodo" />
+          Transferencia
+        </label>
+        <label>
+          <input type="radio" name="metodo" value="tarjeta" [(ngModel)]="metodo" />
+          Tarjeta en el counter
+        </label>
+        <label>
+          <input type="radio" name="metodo" value="credito" [(ngModel)]="metodo" />
+          Crédito
+        </label>
+        <p>El efectivo solo se recibe en sala.</p>
+      </fieldset>
+      <label>
+        <input type="checkbox" name="acepta" [(ngModel)]="acepta" />
+        Acepto los términos y el precio que estoy viendo.
+      </label>
+      @if (unidad.condition === 'usado') {
+        <label>
+          <input type="checkbox" name="lleva" [(ngModel)]="lleva" />
+          Confirmo que llevaré el usado a {{ unidad.branch }} en siete días.
+        </label>
+      }
+      @if (error()) {
+        <p class="aviso-error" role="alert">{{ error() }}</p>
+      }
+      <p class="caminos">
+        <button type="button" (click)="pedir()" [disabled]="sending()">Confirmar reserva</button>
+        <button type="button" (click)="signOut()">Volver</button>
+      </p>
+    </section>
+  </div>
+}

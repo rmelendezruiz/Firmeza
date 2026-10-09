@@ -1,0 +1,60 @@
+<h1><span class="prompt">$</span> vehicles</h1>
+<p class="nota">Autos donde puede aplicar un repuesto.</p>
+
+@if (status() === 'cargando') {
+  <p class="estado" role="status">cargando...</p>
+}
+@if (status() === 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}
+@if (status() === 'listo' && vehicles().length === 0) {
+  <p class="vacio">no hay vehículos.</p>
+}
+@if (status() === 'listo' && vehicles().length > 0) {
+  <table>
+    <thead>
+      <tr>
+        <th>brand</th>
+        <th>línea</th>
+        <th>año</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (vehicle of vehicles(); track vehicle.id) {
+        <tr>
+          <td>{{ vehicle.brand }}</td>
+          <td>{{ vehicle.line }}</td>
+          <td>{{ vehicle.year }}</td>
+          <td class="acciones">
+            <app-terminal-button type="button" (pressed)="edit(vehicle)">editar</app-terminal-button>
+            <app-terminal-button type="button" (pressed)="remove(vehicle)">eliminar</app-terminal-button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+<form class="formulario" (ngSubmit)="save()" novalidate>
+  <p class="nota">{{ editingId() ? 'editando vehículo' : 'nuevo vehículo' }}</p>
+  <label for="brand">brand</label>
+  <input id="brand" name="brand" [(ngModel)]="brand" />
+  <label for="line">línea</label>
+  <input id="line" name="line" [(ngModel)]="line" />
+  <label for="year">año</label>
+  <input id="year" name="year" [(ngModel)]="year" inputmode="numeric" />
+  <div class="acciones">
+    <app-terminal-button type="submit" [disabled]="sending()">guardar</app-terminal-button>
+    @if (editingId()) {
+      <app-terminal-button type="button" (pressed)="cancel()">cancelar</app-terminal-button>
+    }
+  </div>
+</form>
+
+@if (notice()) {
+  <p class="aviso" role="status">{{ notice() }}</p>
+}
+@if (error() && status() !== 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}

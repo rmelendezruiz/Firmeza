@@ -1,0 +1,81 @@
+<div class="sitio mercado">
+  <header class="barra">
+    <a class="name" routerLink="/usados">Firmeza</a>
+    <p class="lugar">{{ email() }}</p>
+    <nav aria-label="Catálogo">
+      <a routerLink="/usados">Usados</a>
+      <button type="button" (click)="signOut()">Salir</button>
+    </nav>
+  </header>
+
+  <main class="catalogo">
+    <h1>Catálogo</h1>
+    <p class="caminos">
+      <button type="button" (click)="ver('cars')">carros</button>
+      <button type="button" (click)="ver('repuestos')">repuestos</button>
+    </p>
+
+    @if (error()) {
+      <p class="aviso-error" role="alert">{{ error() }}</p>
+    } @else if (vista === 'cars') {
+      @if (!listo()) {
+        <p class="vacio">cargando...</p>
+      } @else if (cars().length === 0) {
+        <p class="vacio">No hay carros en la vitrina.</p>
+      } @else {
+        <ul class="tarjetas">
+          @for (car of cars(); track car.id) {
+            <li>
+              <img [src]="foto(car)" [alt]="car.brand + ' ' + car.line" />
+              <div class="ficha">
+                <h2>{{ car.brand }} {{ car.line }} {{ car.year }}</h2>
+                <p class="dato">{{ car.condition }} · {{ car.branch }} · {{ car.city }}</p>
+                @for (line of precios(car); track line) {
+                  <p class="detalle-price">{{ line }}</p>
+                }
+                @if (car.pagePrice !== null) {
+                  <button type="button" (click)="open(car)">Comprar</button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    } @else {
+      <form class="filtros-catalogo" (ngSubmit)="buscar()" novalidate>
+        <label>
+          buscar
+          <input name="search" [(ngModel)]="search" />
+        </label>
+        <button type="submit">consultar</button>
+      </form>
+      @if (!listo()) {
+        <p class="vacio">cargando...</p>
+      } @else if (parts().length === 0) {
+        <p class="vacio">No hay repuestos con esa consulta.</p>
+      } @else {
+        <ul class="repuestos">
+          @for (part of parts(); track part.id) {
+            <li>
+              <p class="pieza">{{ part.name }}</p>
+              <p class="dato">{{ part.brand }} · {{ part.category }}</p>
+              <p class="price">{{ moneda(part.price) }}</p>
+              <p class="aplicaciones">
+                {{ part.sku }}
+                ·
+                {{ part.available ? 'disponible' : 'sin existencias' }}
+                @if (part.fitments.length > 0) {
+                  · {{ part.fitments.join(' · ') }}
+                }
+              </p>
+            </li>
+          }
+        </ul>
+      }
+    }
+    @if (notice()) {
+      <p class="aviso" role="status">{{ notice() }}</p>
+    }
+  </main>
+  <app-compra [car]="enCompra()" (closed)="enCompra.set(null)" (hecha)="items($event)" />
+</div>

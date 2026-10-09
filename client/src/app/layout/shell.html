@@ -1,0 +1,35 @@
+<div class="shell">
+  <aside class="sidebar">
+    <p class="marca">Firmeza</p>
+    <p class="quien">
+      {{ email() }}
+      <span class="rol">{{ role() }}@if (branch()) { · {{ branch() }} }</span>
+    </p>
+    <nav aria-label="Módulos">
+      @if (seesHeadquarters()) {
+        <a routerLink="/home" routerLinkActive="activo">Operación</a>
+        <a routerLink="/headquarters" routerLinkActive="activo">Dirección</a>
+      }
+      @if (seesManagement()) {
+        <a routerLink="/management" routerLinkActive="activo">{{ managementName() }}</a>
+      }
+      @if (seesPerformance()) {
+        <a routerLink="/performance" routerLinkActive="activo">Mi desempeño</a>
+      }
+      <a routerLink="/sales" routerLinkActive="activo">{{ canSell() ? 'Ventas' : 'Ventas registradas' }}</a>
+      <a routerLink="/cars" routerLinkActive="activo">Carros</a>
+      @if (isAdmin()) {
+        <a routerLink="/staff" routerLinkActive="activo">Equipo</a>
+      }
+      <a routerLink="/products" routerLinkActive="activo">Repuestos</a>
+      <a routerLink="/brands" routerLinkActive="activo">Marcas</a>
+      <a routerLink="/categories" routerLinkActive="activo">Categorías</a>
+      <a routerLink="/vehicles" routerLinkActive="activo">Compatibilidad</a>
+      <a routerLink="/customers" routerLinkActive="activo">Clientes</a>
+    </nav>
+    <app-terminal-button (pressed)="signOut()">Cerrar sesión</app-terminal-button>
+  </aside>
+  <section class="contenido">
+    <router-outlet />
+  </section>
+</div>

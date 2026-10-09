@@ -1,0 +1,48 @@
+<div class="marco">
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<header class="cima" [class.clara]="tono() === 'claro'">
+  <p class="marca">
+    <a [routerLink]="marcaVaA()" (click)="irMarca($event)">Firmeza</a>
+  </p>
+  <nav aria-label="Principal">
+    <ul>
+      <li><a routerLink="/" fragment="counters">Counters</a></li>
+      <li><a routerLink="/usados">Carros</a></li>
+      <li><a routerLink="/" fragment="compra">Compra</a></li>
+      @if (esCliente()) {
+        <li><a routerLink="/catalogo">Mi catálogo</a></li>
+      } @else {
+        <li><a routerLink="/cuenta">Ingresar</a></li>
+      }
+      @if (esEquipo()) {
+        <li><a [routerLink]="casa()">Panel</a></li>
+      }
+    </ul>
+  </nav>
+</header>
+
+<ng-content />
+
+<footer class="pie">
+  <p class="marca">Firmeza</p>
+  <p class="cierre">El mismo car, en el counter y en la página. Tres puntos en la costa, un solo stock.</p>
+  <div class="columnas">
+    @for (branch of branches(); track branch.id) {
+      <address>
+        <a [routerLink]="['/counters', branch.code.toLowerCase()]">{{ branch.name }}</a>
+        <p>{{ branch.headquarters }}</p>
+        <p><a [href]="'tel:' + branch.phone">{{ branch.phone }}</a></p>
+        <p><a [href]="'mailto:' + branch.email">{{ branch.email }}</a></p>
+        <p><a [href]="mapa(branch)" rel="noreferrer" target="_blank">Ver en el mapa</a></p>
+      </address>
+    }
+    <section>
+      <h2>Casa</h2>
+      <p><a routerLink="/usados">Catálogo</a></p>
+      <p><a routerLink="/cuenta">Cuenta de cliente</a></p>
+      <p>El equipo entra por su puerta. El customer abre la suya.</p>
+    </section>
+  </div>
+  <p class="legal">Firmeza · Costa Atlántica. Los counters son puntos propios. Las fotos del set son de referencia de sala y patio.</p>
+</footer>
+</div>

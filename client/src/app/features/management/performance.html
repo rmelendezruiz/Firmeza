@@ -1,0 +1,59 @@
+<h1>Mi desempeño</h1>
+<p class="nota">
+  @if (datos()?.branch; as branch) {
+    Counter {{ branch.name }}.
+  } @else {
+    Todavía no tienes counter asignado; pídeselo al admin.
+  }
+  Tus sales del período, la meta y la comisión, calculada antes de IVA. Desde aquí le escribes a tu gerente y a la
+  dirección.
+</p>
+
+<form class="formulario" (ngSubmit)="load()" novalidate>
+  <label>Período <input name="period" [(ngModel)]="period" /></label>
+  <app-terminal-button type="submit">Ver período</app-terminal-button>
+</form>
+
+@if (error()) {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}
+@if (datos(); as datos) {
+  <section class="kpis" aria-label="Desempeño">
+    <article>
+      <p class="etiqueta">Ventas</p>
+      <p class="cifra">{{ datos.row.sales }}</p>
+    </article>
+    <article>
+      <p class="etiqueta">Monto</p>
+      <p class="cifra">{{ moneda(datos.row.amount) }}</p>
+    </article>
+    <article>
+      <p class="etiqueta">Meta</p>
+      <p class="cifra">{{ datos.row.progress }}%</p>
+      <p class="ayuda">{{ moneda(datos.row.target) }}</p>
+    </article>
+    <article>
+      <p class="etiqueta">Comisión</p>
+      <p class="cifra">{{ moneda(datos.row.commission) }}</p>
+      <p class="ayuda">Sueldo {{ moneda(datos.row.salary) }}</p>
+    </article>
+  </section>
+
+  <h2>Messages</h2>
+  <label for="con">Para
+    <select id="con" name="con" [(ngModel)]="con" (ngModelChange)="read()">
+      @for (contacto of datos.contacts; track contacto.email) {
+        <option [value]="contacto.email">{{ contacto.email }} · {{ roleName(contacto.role) }}</option>
+      }
+    </select>
+  </label>
+  <ul class="recientes">
+    @for (message of messages(); track message.id) {
+      <li>{{ message.fromEmail }}: {{ message.text }}</li>
+    }
+  </ul>
+  <form class="formulario" (ngSubmit)="send()" novalidate>
+    <label>Mensaje <input name="text" [(ngModel)]="text" /></label>
+    <app-terminal-button type="submit">Enviar</app-terminal-button>
+  </form>
+}

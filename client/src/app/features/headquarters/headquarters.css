@@ -1,0 +1,102 @@
+th[scope='row'] {
+  color: var(--term-fg);
+  font-weight: 600;
+}
+
+.avance {
+  display: block;
+  width: 100%;
+  max-width: 9rem;
+  height: 0.35rem;
+  margin: 0.2rem 0 0.25rem;
+  background: #e3e8ee;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barra {
+  display: block;
+  height: 100%;
+  background: var(--term-accent);
+}
+
+.dos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.sedes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 0.6rem 0 1.5rem;
+}
+
+.sede {
+  padding: 0.9rem 1rem;
+  background: var(--panel);
+  border: 1px solid var(--term-border);
+  border-radius: 8px;
+}
+
+.sede h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.sede address {
+  color: var(--term-dim);
+  font-style: normal;
+  font-size: 0.85rem;
+}
+
+.datos-sede {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.8rem;
+  margin: 0.7rem 0;
+}
+
+.datos-sede dt {
+  color: var(--term-dim);
+  font-size: 0.75rem;
+}
+
+.datos-sede dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.activos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--term-border);
+}
+
+.activos li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--term-border);
+  font-size: 0.85rem;
+}
+
+.etiqueta-estado {
+  flex: none;
+  color: #1d6b3a;
+  font-size: 0.75rem;
+}
+
+.etiqueta-estado.mantenimiento {
+  color: #9a5b00;
+}
+
+@media (max-width: 980px) {
+  .dos,
+  .sedes {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,25 @@
+<main class="acceso">
+  <section class="tarjeta-acceso">
+    <p class="marca">Firmeza</p>
+    <h1>Ingreso del equipo</h1>
+    <p class="nota">Usa el email y la clave de la account que abrió el administrador.</p>
+    <p class="nota"><a routerLink="/">Volver a los usados</a></p>
+    @if (esCliente()) {
+      <p>Hay una sesión de customer abierta. Ciérrala para entrar con el equipo.</p>
+      <app-terminal-button (pressed)="cerrarCliente()">Cerrar sesión de customer</app-terminal-button>
+    } @else {
+      <form class="formulario" (ngSubmit)="send()" novalidate>
+        <label for="email">Correo
+          <input id="email" name="email" [(ngModel)]="email" autocomplete="username" />
+        </label>
+        <label for="clave">Clave
+          <input id="clave" name="clave" type="password" [(ngModel)]="password" autocomplete="current-password" />
+        </label>
+        <app-terminal-button type="submit" [disabled]="sending()">Ingresar</app-terminal-button>
+      </form>
+      @if (error()) {
+        <p class="aviso-error" role="alert">{{ error() }}</p>
+      }
+    }
+  </section>
+</main>

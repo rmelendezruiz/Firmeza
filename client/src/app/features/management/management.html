@@ -1,0 +1,142 @@
+@if (board(); as datos) {
+  <h1>{{ veTodos() ? 'Counters' : 'Mi counter' }} · {{ datos.branch.name }}</h1>
+  <p class="nota">
+    Gerente: {{ datos.manager ?? 'sin asignar' }}. Ventas del período, meta del counter y cómo va cada comercial. El
+    primero de la tabla es quien más vendió.
+  </p>
+} @else {
+  <h1>Gerencia</h1>
+}
+
+<form class="formulario" (ngSubmit)="load()" novalidate>
+  @if (board()?.branches?.length) {
+    <label for="branch">Counter
+      <select id="branch" name="branch" [(ngModel)]="branchId" (ngModelChange)="load()">
+        @for (branch of board()!.branches; track branch.id) {
+          <option [value]="branch.id">{{ branch.code }} · {{ branch.name }}</option>
+        }
+      </select>
+    </label>
+  }
+  <label for="period">Período
+    <input id="period" name="period" [(ngModel)]="period" placeholder="2026-10" />
+  </label>
+  <app-terminal-button type="submit">Ver período</app-terminal-button>
+</form>
+
+@if (error()) {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}
+@if (board(); as datos) {
+  <section class="kpis" aria-label="Resumen del counter">
+    <article>
+      <p class="etiqueta">Ventas del período</p>
+      <p class="cifra">{{ datos.sales }}</p>
+      <p class="ayuda">{{ datos.onSite }} en página · {{ datos.atCounter }} en counter</p>
+    </article>
+    <article>
+      <p class="etiqueta">Monto</p>
+      <p class="cifra">{{ moneda(datos.amount) }}</p>
+      <p class="ayuda">Meta {{ moneda(datos.target) }} · {{ datos.progress }}%</p>
+    </article>
+    <article>
+      <p class="etiqueta">En peritaje</p>
+      <p class="cifra">{{ datos.inInspection }}</p>
+      <p class="ayuda">Usados con cargo preliminar</p>
+    </article>
+    <article>
+      <p class="etiqueta">Disponibles</p>
+      <p class="cifra">{{ datos.available }}</p>
+      <p class="ayuda">Carros sin vender en el counter</p>
+    </article>
+  </section>
+
+  <h2>Comerciales</h2>
+  @if (datos.rows.length === 0) {
+    <p class="vacio">Este counter todavía no tiene comerciales.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Comercial</th>
+          <th scope="col">Ventas</th>
+          <th scope="col">Monto</th>
+          <th scope="col">Meta</th>
+          <th scope="col">Avance</th>
+          <th scope="col">Sueldo</th>
+          <th scope="col">Comisión</th>
+          <th scope="col"><span class="oculto">Estado</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of datos.rows; track row.email; let i = $index) {
+          <tr>
+            <td>{{ row.email }}</td>
+            <td>{{ row.sales }}</td>
+            <td>{{ moneda(row.amount) }}</td>
+            <td>{{ moneda(row.target) }}</td>
+            <td>{{ row.progress }}%</td>
+            <td>{{ moneda(row.salary) }}</td>
+            <td>{{ moneda(row.commission) }} · {{ row.commissionPercent }}%</td>
+            <td>{{ lider(row, i) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <p class="nota">La comisión se calcula sobre el valor antes de IVA.</p>
+  }
+
+  <h2>Sueldo y comisión</h2>
+  <form class="formulario" (ngSubmit)="saveStaffCard()" novalidate>
+    <label for="fichaCorreo">Cuenta
+      <select id="fichaCorreo" name="fichaCorreo" [(ngModel)]="fichaCorreo">
+        <option value="">Selecciona</option>
+        @for (email of conFicha(); track email) {
+          <option [value]="email">{{ email }}</option>
+        }
+      </select>
+    </label>
+    <label for="salary">Sueldo <input id="salary" name="salary" [(ngModel)]="salary" inputmode="decimal" /></label>
+    <label for="commission">Comisión % <input id="commission" name="commission" [(ngModel)]="commission" inputmode="decimal" /></label>
+    <app-terminal-button type="submit">Guardar ficha</app-terminal-button>
+  </form>
+
+  <h2>Meta del período</h2>
+  <form class="formulario" (ngSubmit)="saveTarget()" novalidate>
+    <label for="metaCorreo">Comercial
+      <select id="metaCorreo" name="metaCorreo" [(ngModel)]="metaCorreo">
+        <option value="">Selecciona</option>
+        @for (email of conMeta(); track email) {
+          <option [value]="email">{{ email }}</option>
+        }
+      </select>
+    </label>
+    <label for="metaMonto">Monto <input id="metaMonto" name="metaMonto" [(ngModel)]="metaMonto" inputmode="decimal" /></label>
+    <app-terminal-button type="submit">Guardar meta</app-terminal-button>
+  </form>
+
+  <h2>Messages</h2>
+  <label for="con">Conversación con
+    <select id="con" name="con" [(ngModel)]="con" (ngModelChange)="read()">
+      @for (contacto of datos.contacts; track contacto.email) {
+        <option [value]="contacto.email">
+          {{ contacto.email }} · {{ roleName(contacto.role) }}@if (contacto.branch) { · {{ contacto.branch }} }
+        </option>
+      }
+    </select>
+  </label>
+  <ul class="recientes">
+    @for (message of messages(); track message.id) {
+      <li>{{ message.fromEmail }}: {{ message.text }}</li>
+    } @empty {
+      <li class="vacio">Todavía no hay messages en esta conversación.</li>
+    }
+  </ul>
+  <form class="formulario" (ngSubmit)="send()" novalidate>
+    <label for="text">Mensaje <input id="text" name="text" [(ngModel)]="text" /></label>
+    <app-terminal-button type="submit">Enviar</app-terminal-button>
+  </form>
+}
+@if (notice()) {
+  <p class="aviso" role="status">{{ notice() }}</p>
+}

@@ -1,0 +1,82 @@
+<div class="sitio editorial">
+  <app-storefront-frame modo="casa" tono="oscuro">
+    <main id="contenido" class="ficha-counter">
+      @if (error() && !branch()) {
+        <p class="aviso-error" role="alert">{{ error() }}</p>
+      }
+      @if (branch(); as counter) {
+        <article>
+          <header class="hero corto" data-fondo="oscuro">
+            <p class="gesto">{{ counter.code }} · Counter propio</p>
+            <h1>{{ counter.name }}</h1>
+            <p class="lead">{{ counter.headquarters }}</p>
+          </header>
+
+          <section class="banda oscura galeria" aria-labelledby="fotos-counter">
+            <h2 id="fotos-counter">El punto</h2>
+            <ul>
+              @for (foto of counter.photos; track foto.url) {
+                <li>
+                  <figure>
+                    <img [src]="foto.url" [alt]="foto.description" />
+                    <figcaption>{{ foto.description }}</figcaption>
+                  </figure>
+                </li>
+              }
+            </ul>
+          </section>
+
+          <section class="banda clara partida" aria-labelledby="datos-counter">
+            <div>
+              <h2 id="datos-counter">Contacto y horario</h2>
+              <address>
+                <p>{{ counter.headquarters }}, {{ counter.city }}</p>
+                <p>Sala <a [href]="'tel:' + counter.phone">{{ counter.phone }}</a></p>
+                <p>Peritaje <a [href]="'tel:' + counter.inspectionPhone">{{ counter.inspectionPhone }}</a></p>
+                <p><a [href]="'mailto:' + counter.email">{{ counter.email }}</a></p>
+                <p>{{ counter.hours }}</p>
+              </address>
+              <p>
+                {{ counter.available }}
+                {{ counter.available === 1 ? 'car disponible en este counter.' : 'cars disponibles en este counter.' }}
+              </p>
+            </div>
+            <aside>
+              <h2>Punto en el mapa</h2>
+              <iframe
+                title="Mapa del counter"
+                [src]="embebido(counter)"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+              <p><a [href]="mapa(counter)" rel="noreferrer" target="_blank">Abrir en OpenStreetMap</a></p>
+            </aside>
+          </section>
+
+          <section class="banda oscura" aria-labelledby="stock-counter">
+            <h2 id="stock-counter">En este counter</h2>
+            @if (cars().length === 0) {
+              <p>No hay unidades publicadas en {{ counter.city }} ahora.</p>
+            } @else {
+              <ul class="tarjetas negras">
+                @for (car of cars(); track car.id) {
+                  <li>
+                    <article>
+                      <img [src]="foto(car)" [alt]="car.brand + ' ' + car.line" />
+                      <h3>{{ car.brand }} {{ car.line }} {{ car.year }}</h3>
+                      <p>{{ moneda(car.pagePrice ?? car.counterPrice ?? 0) }}</p>
+                      @for (line of precios(car); track line) {
+                        <p class="detalle-price">{{ line }}</p>
+                      }
+                    </article>
+                  </li>
+                }
+              </ul>
+              <p><a class="boton" [routerLink]="'/usados'" [queryParams]="{ ciudad: counter.city }">Ver en el catálogo</a></p>
+            }
+          </section>
+        </article>
+      }
+    </main>
+  </app-storefront-frame>
+</div>

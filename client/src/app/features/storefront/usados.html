@@ -1,0 +1,61 @@
+<div class="sitio editorial tienda">
+  <app-storefront-frame modo="tienda" tono="oscuro">
+    <main id="contenido" class="listado">
+      <form class="filtros" (ngSubmit)="buscar()" novalidate>
+        <label>Marca <input name="brand" [(ngModel)]="brand" /></label>
+        <label>Modelo <input name="line" [(ngModel)]="line" /></label>
+        <label>
+          Ciudad
+          <select name="ciudad" [(ngModel)]="city">
+            <option value="">Todas</option>
+            <option value="Barranquilla">Barranquilla</option>
+            <option value="Cartagena">Cartagena</option>
+            <option value="Santa Marta">Santa Marta</option>
+          </select>
+        </label>
+        <label>Año desde <input name="anioDesde" [(ngModel)]="yearFrom" inputmode="numeric" /></label>
+        <label>Año hasta <input name="anioHasta" [(ngModel)]="yearTo" inputmode="numeric" /></label>
+        <label>Precio desde <input name="precioDesde" [(ngModel)]="priceFrom" inputmode="decimal" /></label>
+        <label>Precio hasta <input name="precioHasta" [(ngModel)]="priceTo" inputmode="decimal" /></label>
+        <button class="boton" type="submit">Buscar</button>
+        <button class="enlace" type="button" (click)="limpiar()">Limpiar</button>
+      </form>
+
+      <section>
+        <h1>Carros</h1>
+        @if (!listo()) {
+          <p class="vacio">Cargando el catálogo...</p>
+        } @else if (error()) {
+          <p class="aviso-error" role="alert">{{ error() }}</p>
+        } @else if (cars().length === 0) {
+          <p class="vacio">No hay cars con esos filtros.</p>
+        } @else {
+          <p class="ayuda">{{ cars().length === 1 ? '1 resultado' : cars().length + ' resultados' }}</p>
+          <ul class="tarjetas negras">
+            @for (car of cars(); track car.id) {
+              <li>
+                <article>
+                  <img [src]="foto(car)" [alt]="car.brand + ' ' + car.line" />
+                  <div class="ficha">
+                    <h2>{{ car.brand }} {{ car.line }} {{ car.year }}</h2>
+                    <p class="price-grande">{{ moneda(price(car)) }}</p>
+                    <p class="dato">
+                      <a [routerLink]="['/counters', car.branchCode.toLowerCase()]">{{ car.branch }}</a>
+                      · {{ car.condition }} · {{ car.mileage ?? 0 }} km
+                    </p>
+                    @for (line of precios(car); track line) {
+                      <p class="detalle-price">{{ line }}</p>
+                    }
+                    @if (car.pagePrice !== null) {
+                      <a class="boton" routerLink="/cuenta">Ingresar para comprar</a>
+                    }
+                  </div>
+                </article>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </main>
+  </app-storefront-frame>
+</div>

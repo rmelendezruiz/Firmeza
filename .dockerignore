@@ -1,0 +1,5 @@
+**/.git
+**/bin
+**/obj
+client/node_modules
+client/dist

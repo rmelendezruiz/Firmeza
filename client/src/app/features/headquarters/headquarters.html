@@ -1,0 +1,243 @@
+<h1>Dirección</h1>
+<p class="nota">
+  Los tres counters en un solo tablero: cómo va cada gerente, cómo paga la gente, qué se vende en cada ciudad, quién
+  vende más y qué hay en piso, en bodega y en cada branch.
+</p>
+
+<form class="formulario" (ngSubmit)="load()" novalidate>
+  <label for="period">Período <input id="period" name="period" [(ngModel)]="period" placeholder="2026-10" /></label>
+  <app-terminal-button type="submit">Ver período</app-terminal-button>
+</form>
+
+@if (status() === 'cargando') {
+  <p class="estado" role="status">Cargando la dirección...</p>
+}
+@if (status() === 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}
+@if (datos(); as datos) {
+  <section class="kpis" aria-label="Resumen de Firmeza">
+    <article>
+      <p class="etiqueta">Ventas del período</p>
+      <p class="cifra">{{ datos.sales }}</p>
+      <p class="ayuda">{{ canales().web }} en página · {{ canales().counter }} en counter</p>
+    </article>
+    <article>
+      <p class="etiqueta">Monto</p>
+      <p class="cifra">{{ moneda(datos.amount) }}</p>
+      <p class="ayuda">IVA incluido, sin anuladas</p>
+    </article>
+    <article>
+      <p class="etiqueta">Pago más usado</p>
+      <p class="cifra">{{ metodoTop().metodo }}</p>
+      <p class="ayuda">{{ metodoTop().sales }} sales · {{ metodoTop().parte }}%</p>
+    </article>
+    <article>
+      <p class="etiqueta">En peritaje</p>
+      <p class="cifra">{{ datos.inInspection }}</p>
+      <p class="ayuda">Usados reservados con cargo preliminar</p>
+    </article>
+  </section>
+
+  <h2>Counters y gerentes</h2>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Counter</th>
+        <th scope="col">Gerente</th>
+        <th scope="col">Ventas</th>
+        <th scope="col">Monto</th>
+        <th scope="col">Meta</th>
+        <th scope="col">Página · counter</th>
+        <th scope="col">Peritaje</th>
+        <th scope="col">Mejor comercial</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (counter of datos.counters; track counter.branch.id) {
+        <tr>
+          <th scope="row">{{ counter.branch.code }} · {{ counter.branch.name }}</th>
+          <td>
+            {{ counter.manager ?? 'Sin gerente' }}
+            <div class="nota">{{ counter.salespeople }} {{ counter.salespeople === 1 ? 'comercial' : 'comerciales' }}</div>
+          </td>
+          <td>{{ counter.sales }}</td>
+          <td>{{ moneda(counter.amount) }}</td>
+          <td>
+            @if (counter.target > 0) {
+              <span class="progress">
+                <span class="barra" [style.width.%]="counter.progress > 100 ? 100 : counter.progress"></span>
+              </span>
+              {{ counter.progress }}% de {{ moneda(counter.target) }}
+            } @else {
+              Sin meta
+            }
+          </td>
+          <td>{{ counter.onSite }} · {{ counter.atCounter }}</td>
+          <td>{{ counter.inInspection }}</td>
+          <td>
+            @if (counter.topSeller; as mejor) {
+              {{ mejor.email }}
+              <div class="nota">{{ moneda(mejor.amount) }}</div>
+            } @else {
+              Sin sales de comerciales
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="dos">
+    <section aria-labelledby="titulo-pagos">
+      <h2 id="titulo-pagos">Cómo paga la gente</h2>
+      <p class="nota">
+        Página {{ canales().partePagina }}% · Counter {{ canales().parteCounter }}% de las sales del período.
+      </p>
+      @if (datos.payments.length === 0) {
+        <p class="vacio">No hay sales en el período.</p>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Canal</th>
+              <th scope="col">Pago</th>
+              <th scope="col">Ventas</th>
+              <th scope="col">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (pago of datos.payments; track pago.channel + pago.method) {
+              <tr>
+                <td>{{ channel(pago) }}</td>
+                <td>
+                  {{ metodo(pago) }}
+                  <span class="progress"><span class="barra" [style.width.%]="parte(pago)"></span></span>
+                </td>
+                <td>{{ pago.sales }} · {{ parte(pago) }}%</td>
+                <td>{{ moneda(pago.amount) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+
+    <section aria-labelledby="titulo-top">
+      <h2 id="titulo-top">Carro más vendido por ciudad</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Ciudad</th>
+            <th scope="col">Carro</th>
+            <th scope="col">Unidades</th>
+            <th scope="col">Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of datos.top; track row.city) {
+            <tr>
+              <td>{{ row.city }}</td>
+              <td>{{ row.car ?? 'Sin sales' }}</td>
+              <td>{{ row.units }}</td>
+              <td>{{ moneda(row.amount) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <h2>Comerciales de Firmeza</h2>
+  @if (datos.ranking.length === 0) {
+    <p class="vacio">No hay comerciales.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Comercial</th>
+          <th scope="col">Counter</th>
+          <th scope="col">Ventas</th>
+          <th scope="col">Monto</th>
+          <th scope="col">Meta</th>
+          <th scope="col">Comisión</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of datos.ranking; track row.email; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ row.email }}</td>
+            <td>{{ row.branch ?? 'Sin counter' }}</td>
+            <td>{{ row.sales }}</td>
+            <td>{{ moneda(row.amount) }}</td>
+            <td>{{ row.target > 0 ? row.progress + '% de ' + moneda(row.target) : 'Sin meta' }}</td>
+            <td>{{ moneda(row.commission) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  <h2>Stock</h2>
+  <section class="kpis" aria-label="Stock">
+    <article>
+      <p class="etiqueta">Carros en stock</p>
+      <p class="cifra">{{ datos.inventory.cars }}</p>
+      <p class="ayuda">{{ datos.inventory.onFloor }} en piso · {{ datos.inventory.inWarehouse }} en bodega</p>
+    </article>
+    <article>
+      <p class="etiqueta">Valor del stock</p>
+      <p class="cifra">{{ moneda(datos.inventory.value) }}</p>
+      <p class="ayuda">Precio counter o de página</p>
+    </article>
+    <article>
+      <p class="etiqueta">Repuestos</p>
+      <p class="cifra">{{ datos.inventory.units }}</p>
+      <p class="ayuda">{{ datos.inventory.parts }} referencias</p>
+    </article>
+    <article>
+      <p class="etiqueta">Stock bajo</p>
+      <p class="cifra">{{ datos.inventory.lowStock.length }}</p>
+      <p class="ayuda">Referencias con 3 unidades o menos</p>
+    </article>
+  </section>
+  @if (datos.inventory.lowStock.length > 0) {
+    <ul class="recientes">
+      @for (bajo of datos.inventory.lowStock; track bajo.sku) {
+        <li>{{ bajo.sku }} · {{ bajo.name }}: {{ bajo.quantity }}</li>
+      }
+    </ul>
+  }
+
+  <h2>Sedes, equipos e infraestructura</h2>
+  <div class="branches">
+    @for (counter of datos.counters; track counter.branch.id) {
+      <article class="branch">
+        <h3>{{ counter.branch.code }} · {{ counter.branch.name }}</h3>
+        <address>
+          {{ counter.headquarters }}, {{ counter.branch.city }}<br />
+          {{ counter.phone }} · {{ counter.hours }}
+        </address>
+        <dl class="datos-branch">
+          <div><dt>Área</dt><dd>{{ counter.areaM2 }} m²</dd></div>
+          <div><dt>Capacidad</dt><dd>{{ counter.capacity }} cars</dd></div>
+          <div><dt>En piso</dt><dd>{{ counter.onFloor }}</dd></div>
+          <div><dt>En bodega</dt><dd>{{ counter.inWarehouse }}</dd></div>
+          <div><dt>Valor</dt><dd>{{ moneda(counter.inventoryValue) }}</dd></div>
+        </dl>
+        <ul class="activos">
+          @for (asset of counter.assets; track asset.name) {
+            <li>
+              <span>{{ asset.name }} × {{ asset.quantity }}</span>
+              <span class="etiqueta-status" [class.maintenance]="asset.status === 'mantenimiento'">
+                {{ asset.status === 'mantenimiento' ? 'En mantenimiento' : 'Operativo' }}
+              </span>
+            </li>
+          }
+        </ul>
+      </article>
+    }
+  </div>
+}

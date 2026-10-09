@@ -1,0 +1,20 @@
+.term-button {
+  margin: 0;
+  padding: 0.45rem 0.8rem;
+  border: 0;
+  border-radius: 6px;
+  background: var(--term-accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.term-button:hover,
+.term-button:focus-visible {
+  background: #083e6e;
+  outline: none;
+}
+
+.term-button:disabled {
+  background: #9aa6b4;
+  cursor: default;
+}

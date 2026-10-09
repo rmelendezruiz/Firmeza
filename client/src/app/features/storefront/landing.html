@@ -1,0 +1,95 @@
+<div class="sitio editorial">
+  <app-storefront-frame modo="casa" [tono]="tono()">
+    <main id="contenido">
+      <section class="hero" data-fondo="oscuro" aria-labelledby="lema">
+        <p class="gesto">Costa Atlántica · 1956</p>
+        <h1 id="lema">El mismo car, en la sucursal y en la página.</h1>
+        <p class="lead">
+          Tres counters propios. Un stock. Lo ves aquí, lo cierras en línea o lo recoges en sala.
+        </p>
+        <p>
+          <a class="boton enorme" routerLink="/usados">Carros</a>
+        </p>
+      </section>
+
+      <section id="counters" class="banda oscura" data-fondo="oscuro" aria-labelledby="titulo-counters">
+        <header class="cabeza">
+          <p class="gesto">Puntos físicos</p>
+          <h2 id="titulo-counters">Barranquilla, Cartagena y Santa Marta.</h2>
+        </header>
+        @if (error()) {
+          <p class="aviso-error" role="alert">{{ error() }}</p>
+        }
+        <ul class="rejilla">
+          @for (branch of branches(); track branch.id) {
+            <li class="mueve">
+              <article>
+                <a [routerLink]="['/counters', branch.code.toLowerCase()]">
+                  <figure>
+                    <img [src]="foto(branch)" [alt]="'Counter de ' + branch.name" />
+                    <figcaption>
+                      <h3>{{ branch.name }}</h3>
+                      <p>{{ branch.available }} {{ branch.available === 1 ? 'car en piso' : 'cars en piso' }}</p>
+                    </figcaption>
+                  </figure>
+                </a>
+              </article>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section id="casa" class="banda clara partida" data-fondo="claro" aria-labelledby="titulo-casa">
+        <div class="columna mueve">
+          <p class="gesto">Visión</p>
+          <h2 id="titulo-casa">El punto de usados de la costa, con el stock publicado una sola vez.</h2>
+          <p>
+            No hay un car de vitrina y otro de página. Si está en Firmeza, está en el counter que le corresponde
+            y, si tiene price de página, también se puede reservar desde aquí.
+          </p>
+        </div>
+        <aside class="mueve">
+          <p class="gesto">Misión</p>
+          <p>
+            Que el customer lo vea, lo compre en línea o lo recoja en sala, y que el comercial cierre sin un trámite de más.
+          </p>
+          <p>Que gerencia vea el counter que le toca. Que dirección vea los tres.</p>
+        </aside>
+      </section>
+
+      <section id="compra" class="banda oscura pasos" data-fondo="oscuro" aria-labelledby="titulo-compra">
+        <header class="cabeza">
+          <p class="gesto">Compra</p>
+          <h2 id="titulo-compra">Tres pasos. El car no se mueve de ciudad.</h2>
+        </header>
+        <ol>
+          <li class="mueve">
+            <h3>Lo ves</h3>
+            <p>Filtra por ciudad, price, brand y año. El counter de cada unidad está a la vista.</p>
+          </li>
+          <li class="mueve">
+            <h3>Lo reservas</h3>
+            <p>
+              Solo con account de customer. Confirmas el price que viste, eliges transferencia, tarjeta o crédito
+              y aceptas los términos. El efectivo queda para la sala.
+            </p>
+          </li>
+          <li class="mueve">
+            <h3>Lo llevas a peritaje</h3>
+            <p>
+              Si es usado, queda un cargo preliminar del 10% y siete días para llevarlo al counter. Un car a la vez.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="banda clara llamada" data-fondo="claro" aria-labelledby="titulo-llamada">
+        <p class="gesto mueve">Catálogo</p>
+        <h2 id="titulo-llamada" class="mueve">Entra a los cars o abre la ficha del counter.</h2>
+        <p class="mueve">
+          <a class="boton enorme" routerLink="/usados">Carros</a>
+        </p>
+      </section>
+    </main>
+  </app-storefront-frame>
+</div>

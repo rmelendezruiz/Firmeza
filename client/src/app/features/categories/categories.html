@@ -1,0 +1,52 @@
+<h1><span class="prompt">$</span> categories</h1>
+<p class="nota">Familia del repuesto: frenos, filtros, lubricantes.</p>
+
+@if (status() === 'cargando') {
+  <p class="estado" role="status">cargando...</p>
+}
+@if (status() === 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}
+@if (status() === 'listo' && categories().length === 0) {
+  <p class="vacio">no hay categorías.</p>
+}
+@if (status() === 'listo' && categories().length > 0) {
+  <table>
+    <thead>
+      <tr>
+        <th>name</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (category of categories(); track category.id) {
+        <tr>
+          <td>{{ category.name }}</td>
+          <td class="acciones">
+            <app-terminal-button type="button" (pressed)="edit(category)">editar</app-terminal-button>
+            <app-terminal-button type="button" (pressed)="remove(category)">eliminar</app-terminal-button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+<form class="formulario" (ngSubmit)="save()" novalidate>
+  <p class="nota">{{ editingId() ? 'editando categoría' : 'nueva categoría' }}</p>
+  <label for="name">name</label>
+  <input id="name" name="name" [(ngModel)]="name" />
+  <div class="acciones">
+    <app-terminal-button type="submit" [disabled]="sending()">guardar</app-terminal-button>
+    @if (editingId()) {
+      <app-terminal-button type="button" (pressed)="cancel()">cancelar</app-terminal-button>
+    }
+  </div>
+</form>
+
+@if (notice()) {
+  <p class="aviso" role="status">{{ notice() }}</p>
+}
+@if (error() && status() !== 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}

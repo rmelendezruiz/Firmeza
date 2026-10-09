@@ -1,0 +1,72 @@
+<h1>Operación</h1>
+<p class="nota">Ventas del punto y de la página, y los cars que siguen disponibles.</p>
+
+@if (status() === 'cargando') {
+  <p class="estado" role="status">Cargando la operación...</p>
+}
+@if (status() === 'error') {
+  <p class="aviso-error" role="alert">{{ error() }}</p>
+}
+@if (status() === 'listo') {
+  <section class="kpis" aria-label="Resumen">
+    <article>
+      <p class="etiqueta">Ventas en el punto</p>
+      <p class="cifra">{{ mesa().physicalStore }}</p>
+      <p class="ayuda">Registradas en sucursal</p>
+    </article>
+    <article>
+      <p class="etiqueta">Ventas en la página</p>
+      <p class="cifra">{{ mesa().web }}</p>
+      <p class="ayuda">Incluye peritaje y cerradas</p>
+    </article>
+    <article>
+      <p class="etiqueta">Con price de página</p>
+      <p class="cifra">{{ mesa().published }}</p>
+      <p class="ayuda">Se pueden comprar en línea</p>
+    </article>
+    <article>
+      <p class="etiqueta">Disponibles</p>
+      <p class="cifra">{{ mesa().available }}</p>
+      <p class="ayuda">Todavía no vendidos</p>
+    </article>
+  </section>
+
+  @if (canSell() || puedePublicar()) {
+    <p class="acciones">
+      @if (canSell()) {
+        <a routerLink="/sales" class="term-button">Registrar sale</a>
+      }
+      @if (puedePublicar()) {
+        <a routerLink="/cars" class="term-button">Publicar car</a>
+      }
+    </p>
+  }
+
+  <h2>Últimas sales</h2>
+  @if (mesa().recent.length === 0) {
+    <p class="vacio">Todavía no hay sales.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Cliente</th>
+          <th>Canal</th>
+          <th>Unidad</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (sale of mesa().recent; track sale.id) {
+          <tr>
+            <td>{{ sale.number }}</td>
+            <td>{{ sale.customerName }}</td>
+            <td>{{ channel(sale.channel) }}</td>
+            <td>{{ sale.carName || 'Repuesto' }}</td>
+            <td>{{ moneda(sale.total) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+}
